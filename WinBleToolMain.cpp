@@ -163,11 +163,21 @@ void WinBleToolDialog::RefreshBLEDeviceList()
                                     }
                                 };
 
-                                readCharacteristicValueAndDisplay(characteristics, GATT_UUID_MANU_NAME);
 
-                                readCharacteristicValueAndDisplay(characteristics, GATT_UUID_SW_VERSION_STR);
+                                try
+                                {
+                                    readCharacteristicValueAndDisplay(characteristics, GATT_UUID_MANU_NAME);
 
-                                readCharacteristicValueAndDisplay(characteristics, GATT_UUID_MODEL_NUMBER_STR);
+                                    readCharacteristicValueAndDisplay(characteristics, GATT_UUID_SW_VERSION_STR);
+
+                                    readCharacteristicValueAndDisplay(characteristics, GATT_UUID_MODEL_NUMBER_STR);
+                                }
+                                catch (BleException const &e)
+                                {
+                                    wxLogError(e.what());
+                                    wxLogError(_T("读取设备信息出错..."));
+                                }
+
 
                                 wxLogMessage("\r\n%s",out.str());
                             }
