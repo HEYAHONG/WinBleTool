@@ -47,6 +47,9 @@ find_package(wxWidgets REQUIRED all )
 include(${wxWidgets_USE_FILE})
 target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES})
 
+#只支持Win10及以上系统,且必须使用UNICODE
+add_definitions("-D_WIN32_WINNT=_WIN32_WINNT_WIN10" "-DUNICODE" "-DINITGUID")
+
 #添加WinBle库
 add_subdirectory(WinBle/src)
 Set(PROJECT_NAME WinBleTool)

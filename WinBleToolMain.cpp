@@ -7,6 +7,12 @@
  * License:
  **************************************************************/
 
+#include <Utility.h>
+#include <BleDevice.h>
+#include <BleException.h>
+#include <BleGattServices.h>
+#include <BleDeviceEnumerator.h>
+
 #ifdef WX_PRECOMP
 #include "wx_pch.h"
 #endif
@@ -19,11 +25,6 @@
 #include "wx/msgdlg.h"
 #include "wx/textdlg.h"
 #include "wx/log.h"
-#include <Utility.h>
-#include <BleDevice.h>
-#include <BleException.h>
-#include <BleGattServices.h>
-#include <BleDeviceEnumerator.h>
 #include <sstream>
 
 extern const char * bluetooth_ico_xpm[];
