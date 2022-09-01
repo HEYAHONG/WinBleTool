@@ -52,8 +52,8 @@ GUIDialog::GUIDialog( wxWindow* parent, wxWindowID id, const wxString& title, co
 	m_textCtrl1 = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
 	m_mgr.AddPane( m_textCtrl1, wxAuiPaneInfo() .Left() .CaptionVisible( false ).PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).CentrePane() );
 
-	m_treeCtrl1 = new wxTreeCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT );
-	m_mgr.AddPane( m_treeCtrl1, wxAuiPaneInfo() .Left() .CloseButton( false ).PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).MinSize( wxSize( 250,-1 ) ) );
+	m_treeCtrl1 = new wxTreeCtrl( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT );
+	m_mgr.AddPane( m_treeCtrl1, wxAuiPaneInfo() .Top() .CloseButton( false ).PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).BottomDockable( false ).LeftDockable( false ).RightDockable( false ).MinSize( wxSize( 800,300 ) ) );
 
 	m_UpdateUI_timer.SetOwner( this, wxID_UpdateUI_timer );
 	m_UpdateUI_timer.Start( 5 );

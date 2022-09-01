@@ -73,11 +73,21 @@ void WinBleToolDialog::RefreshBLEDeviceList()
         try
         {
             BleDeviceEnumerator::enumerate();
+            {
+                //清空原有数据
+                m_treeCtrl1->DeleteAllItems();
+                m_treeCtrl1->AddRoot(_T("BLE"));
+
+            }
             for (BleDeviceInfo const *i : BleDeviceEnumerator::getBleDevices())
             {
 
                 wxLogMessage(_T("\r\n名称: %s\r\nHardwareId: %s\r\nInstanceId: %s"),i->getName(),i->getHardwareId(),i->getInstanceId());
                 wxLogMessage(_T("正在枚举BLE设备服务..."));
+
+                //添加至TreeCtrl
+                wxTreeItemId treedevice=m_treeCtrl1->AppendItem(m_treeCtrl1->GetRootItem(),wxString(_T("设备:"))+i->getName()+" ("+i->getInstanceId()+")");
+
                 BleDevice bleDevice = BleDevice(i->getInstanceId());
                 bleDevice.enumerateBleServices();
                 {
@@ -98,6 +108,9 @@ void WinBleToolDialog::RefreshBLEDeviceList()
                                 << Utility::guidToString(s->getServiceUuid().Value.LongUuid) << "]"
                                 << " Short Id: [" << tohex(s->getServiceUuid().Value.ShortUuid) << "]" << endl;
 
+                            //添加服务
+                            wxTreeItemId treeservice=m_treeCtrl1->AppendItem(treedevice,wxString(_T("服务:"))+Utility::guidToString(s->getServiceUuid().Value.LongUuid)+ " ["+tohex(s->getServiceUuid().Value.ShortUuid)+"]");
+
                             s->enumerateBleCharacteristics();
 
                             for (unique_ptr<BleGattCharacteristic> const& c : s->getBleCharacteristics())
@@ -105,6 +118,9 @@ void WinBleToolDialog::RefreshBLEDeviceList()
                                 out << "\tCharacteristic - Guid: ["
                                     << Utility::guidToString(c->getCharacteristicUuid().Value.LongUuid) << "]"
                                     << " Short Id: [" << tohex(c->getCharacteristicUuid().Value.ShortUuid) << "]" << endl;
+
+                                //添加特征值
+                                wxTreeItemId treechar=m_treeCtrl1->AppendItem(treeservice,wxString(_T("特征:"))+Utility::guidToString(c->getCharacteristicUuid().Value.LongUuid)+ " ["+tohex(c->getCharacteristicUuid().Value.ShortUuid)+"]");
 
                                 out << "\t\tIsBroadcastable: " << +c->getIsBroadcastable() << endl
                                     << "\t\tIsIndicatable: " << +c->getIsIndicatable() << endl
