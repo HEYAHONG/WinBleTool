@@ -1,0 +1,4 @@
+[submodule "WinBle"]
+	path = WinBle
+	url = git@github.com:HEYAHONG/WinBle.git
+	branch = mingw
