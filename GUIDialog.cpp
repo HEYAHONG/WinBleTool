@@ -22,6 +22,7 @@
 BEGIN_EVENT_TABLE( GUIDialog, wxFrame )
 	EVT_MENU( ID_Menu_Refresh, GUIDialog::_wxFB_OnMenuRefresh )
 	EVT_MENU( ID_Menu_About, GUIDialog::_wxFB_OnAbout )
+	EVT_TREE_ITEM_RIGHT_CLICK( wxID_ANY, GUIDialog::_wxFB_OnTreeItemRightClick )
 	EVT_TIMER( wxID_UpdateUI_timer, GUIDialog::_wxFB_OnUpdateUITimer )
 END_EVENT_TABLE()
 

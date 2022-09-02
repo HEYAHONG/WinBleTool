@@ -251,6 +251,7 @@
                 <property name="window_extra_style"></property>
                 <property name="window_name"></property>
                 <property name="window_style"></property>
+                <event name="OnTreeItemRightClick">OnTreeItemRightClick</event>
             </object>
             <object class="wxTimer" expanded="0">
                 <property name="enabled">1</property>

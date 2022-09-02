@@ -46,6 +46,7 @@ class GUIDialog : public wxFrame
 		// Private event handlers
 		void _wxFB_OnMenuRefresh( wxCommandEvent& event ){ OnMenuRefresh( event ); }
 		void _wxFB_OnAbout( wxCommandEvent& event ){ OnAbout( event ); }
+		void _wxFB_OnTreeItemRightClick( wxTreeEvent& event ){ OnTreeItemRightClick( event ); }
 		void _wxFB_OnUpdateUITimer( wxTimerEvent& event ){ OnUpdateUITimer( event ); }
 
 
@@ -61,6 +62,7 @@ class GUIDialog : public wxFrame
 		// Virtual event handlers, override them in your derived class
 		virtual void OnMenuRefresh( wxCommandEvent& event ) = 0;
 		virtual void OnAbout( wxCommandEvent& event ) = 0;
+		virtual void OnTreeItemRightClick( wxTreeEvent& event ) = 0;
 		virtual void OnUpdateUITimer( wxTimerEvent& event ) = 0;
 
 

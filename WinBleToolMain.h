@@ -33,6 +33,7 @@ private:
     virtual void OnAbout(wxCommandEvent& event);
     virtual void OnMenuRefresh( wxCommandEvent& event );
     virtual void OnUpdateUITimer( wxTimerEvent& event );
+    virtual void OnTreeItemRightClick( wxTreeEvent& event );
 
     /*
         许多更新UI的操作最好在定时器/主线程内调用,故需要更新UI的队列

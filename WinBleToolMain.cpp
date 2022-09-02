@@ -22,6 +22,7 @@
 #endif //__BORLANDC__
 
 #include "WinBleToolMain.h"
+#include "BLEwxTreeItemData.h"
 #include "wx/msgdlg.h"
 #include "wx/textdlg.h"
 #include "wx/log.h"
@@ -87,6 +88,11 @@ void WinBleToolDialog::RefreshBLEDeviceList()
 
                 //添加至TreeCtrl
                 wxTreeItemId treedevice=m_treeCtrl1->AppendItem(m_treeCtrl1->GetRootItem(),wxString(_T("设备:"))+i->getName()+" ("+i->getInstanceId()+")");
+                {
+                    BLEDevicewxTreeItemData * data=new BLEDevicewxTreeItemData();
+                    data->setInstanceId(i->getInstanceId());
+                    m_treeCtrl1->SetItemData(treedevice,data);
+                }
 
                 BleDevice bleDevice = BleDevice(i->getInstanceId());
                 bleDevice.enumerateBleServices();
@@ -109,7 +115,22 @@ void WinBleToolDialog::RefreshBLEDeviceList()
                                 << " Short Id: [" << tohex(s->getServiceUuid().Value.ShortUuid) << "]" << endl;
 
                             //添加服务
-                            wxTreeItemId treeservice=m_treeCtrl1->AppendItem(treedevice,wxString(_T("服务:"))+Utility::guidToString(s->getServiceUuid().Value.LongUuid)+ " ["+tohex(s->getServiceUuid().Value.ShortUuid)+"]");
+                            wxString UUID;
+                            if(s->getServiceUuid().IsShortUuid)
+                            {
+                                UUID=tohex(s->getServiceUuid().Value.ShortUuid);
+                            }
+                            else
+                            {
+                                UUID=Utility::guidToString(s->getServiceUuid().Value.LongUuid);
+                            }
+                            wxTreeItemId treeservice=m_treeCtrl1->AppendItem(treedevice,wxString(_T("服务:"))+ UUID);
+                            {
+                                BLEServicewxTreeItemData *data=new BLEServicewxTreeItemData();
+                                data->setInstanceId(i->getInstanceId());
+                                data->setServiceUUID(s->getServiceUuid());
+                                m_treeCtrl1->SetItemData(treeservice,data);
+                            }
 
                             s->enumerateBleCharacteristics();
 
@@ -119,8 +140,6 @@ void WinBleToolDialog::RefreshBLEDeviceList()
                                     << Utility::guidToString(c->getCharacteristicUuid().Value.LongUuid) << "]"
                                     << " Short Id: [" << tohex(c->getCharacteristicUuid().Value.ShortUuid) << "]" << endl;
 
-                                //添加特征值
-                                wxTreeItemId treechar=m_treeCtrl1->AppendItem(treeservice,wxString(_T("特征:"))+Utility::guidToString(c->getCharacteristicUuid().Value.LongUuid)+ " ["+tohex(c->getCharacteristicUuid().Value.ShortUuid)+"]");
 
                                 out << "\t\tIsBroadcastable: " << +c->getIsBroadcastable() << endl
                                     << "\t\tIsIndicatable: " << +c->getIsIndicatable() << endl
@@ -129,6 +148,87 @@ void WinBleToolDialog::RefreshBLEDeviceList()
                                     << "\t\tIsSignedWritable: " << +c->getIsSignedWritable() << endl
                                     << "\t\tIsWritable: " << +c->getIsWritable() << endl
                                     << "\t\tIsWritableWithoutResponse:" << +c->getIsWritableWithoutResponse() << endl;
+
+                                wxString flags;
+                                {
+                                    if(c->getIsBroadcastable())
+                                    {
+                                        flags+=_T(" Broadcastable");
+                                    }
+                                    if(c->getIsIndicatable())
+                                    {
+                                        flags+=_T(" Indicatable");
+                                    }
+                                    if(c->getIsNotifiable())
+                                    {
+                                        flags+=_T(" Notifiable");
+                                    }
+                                    if(c->getIsReadable())
+                                    {
+                                        flags+=_T(" Readable");
+                                    }
+                                    if(c->getIsSignedWritable())
+                                    {
+                                        flags+=_T(" SignedWritable");
+                                    }
+                                    if(c->getIsWritable())
+                                    {
+                                        flags+=_T(" Writable");
+                                    }
+                                    if(c->getIsWritableWithoutResponse())
+                                    {
+                                        flags+=_T(" WritableWithoutResponse");
+                                    }
+                                }
+
+                                //添加特征值
+                                wxString UUID;
+                                if(c->getCharacteristicUuid().IsShortUuid)
+                                {
+                                    UUID=tohex(c->getCharacteristicUuid().Value.ShortUuid);
+                                }
+                                else
+                                {
+                                    UUID=Utility::guidToString(c->getCharacteristicUuid().Value.LongUuid);
+                                }
+                                wxTreeItemId treechar=m_treeCtrl1->AppendItem(treeservice,wxString(_T("特征:"))+UUID+" ("+flags+" )");
+                                {
+                                    BLECharwxTreeItemData *data=new BLECharwxTreeItemData();
+                                    data->setInstanceId(i->getInstanceId());
+                                    data->setServiceUUID(s->getServiceUuid());
+                                    data->setCharUUID(c->getCharacteristicUuid());
+                                    m_treeCtrl1->SetItemData(treechar,data);
+                                }
+
+                                try
+                                {
+                                    c->enumerateBleDescriptors();
+                                    for(unique_ptr<BleGattDescriptor> const &d:c->getBleDescriptors())
+                                    {
+                                        out << "\t\tDescriptor - Guid: ["
+                                            << Utility::guidToString(d->getDescriptorUuid().Value.LongUuid) << "]"
+                                            << " Short Id: [" << tohex(d->getDescriptorUuid().Value.ShortUuid) << "]" << endl;
+
+                                        wxString UUID;
+                                        if(d->getDescriptorUuid().IsShortUuid)
+                                        {
+                                            UUID=tohex(d->getDescriptorUuid().Value.ShortUuid);
+                                        }
+                                        else
+                                        {
+                                            UUID=Utility::guidToString(d->getDescriptorUuid().Value.LongUuid);
+                                        }
+                                        wxTreeItemId treedesc=m_treeCtrl1->AppendItem(treechar,wxString(_T("描述符:"))+UUID);
+
+
+                                    }
+                                }
+                                catch (BleException const &e)
+                                {
+                                    wxLogError(e.what());
+                                    wxLogError(_T("访问特征描述出错..."));
+                                }
+
                             }
                         }
                         catch (BleException const &e)
@@ -221,4 +321,44 @@ void WinBleToolDialog::OnMenuRefresh( wxCommandEvent& event )
 void  WinBleToolDialog::OnUpdateUITimer( wxTimerEvent& event )
 {
     ProcessUpdateUIFunction();
+}
+
+void WinBleToolDialog::OnTreeItemRightClick( wxTreeEvent& event )
+{
+    wxTreeItemData * data=dynamic_cast<wxTreeItemData *>(event.GetClientObject());
+    if(data!=NULL)
+    {
+        //数据不为空
+        {
+            BLEDevicewxTreeItemData * device=dynamic_cast<BLEDevicewxTreeItemData *>(data);
+            if(device!=NULL)
+            {
+                //设备项
+                m_treeCtrl1->SelectItem(device->GetId());
+                m_treeCtrl1->Expand(device->GetId());
+            }
+        }
+
+        {
+            BLEServicewxTreeItemData *service=dynamic_cast<BLEServicewxTreeItemData *>(data);
+            if(service!=NULL)
+            {
+                //服务项
+                m_treeCtrl1->SelectItem(service->GetId());
+                m_treeCtrl1->Expand(service->GetId());
+            }
+        }
+
+        {
+            BLECharwxTreeItemData *Char=dynamic_cast<BLECharwxTreeItemData *>(data);
+            if(Char!=NULL)
+            {
+                //特征项
+                m_treeCtrl1->SelectItem(Char->GetId());
+                m_treeCtrl1->Expand(Char->GetId());
+
+            }
+        }
+
+    }
 }
