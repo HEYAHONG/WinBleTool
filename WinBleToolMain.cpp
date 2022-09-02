@@ -468,9 +468,9 @@ void WinBleToolDialog::OnTreeItemRightClick( wxTreeEvent& event )
                                                     auto to_hex=[](const unsigned char *data,unsigned long len)->wxString
                                                     {
                                                         wxString ret;
-                                                        for(size_t i=0;i<len;i++)
+                                                        for(size_t i=0; i<len; i++)
                                                         {
-                                                            char buff[10]={0};
+                                                            char buff[10]= {0};
                                                             sprintf(buff,"%02X ",data[i]);
                                                             ret+=buff;
                                                         }
