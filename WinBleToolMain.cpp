@@ -208,6 +208,13 @@ void WinBleToolDialog::RefreshBLEDeviceList()
                                     data->setInstanceId(i->getInstanceId());
                                     data->setServiceUUID(s->getServiceUuid());
                                     data->setCharUUID(c->getCharacteristicUuid());
+                                    {
+                                        data->flag.notify=c->getIsNotifiable();
+                                        data->flag.read=c->getIsReadable();
+                                        data->flag.signedwrite=c->getIsSignedWritable();
+                                        data->flag.write=c->getIsWritable();
+                                        data->flag.writewithoutresponse=c->getIsWritableWithoutResponse();
+                                    }
                                     m_treeCtrl1->SetItemData(treechar,data);
                                 }
 
@@ -235,6 +242,14 @@ void WinBleToolDialog::RefreshBLEDeviceList()
                                             UUID=Utility::guidToString(d->getDescriptorUuid().Value.LongUuid);
                                         }
                                         wxTreeItemId treedesc=m_treeCtrl1->AppendItem(treechar,wxString(_T("描述符:"))+UUID);
+                                        {
+                                            BLEDescwxTreeItemData *data=new BLEDescwxTreeItemData();
+                                            data->setInstanceId(i->getInstanceId());
+                                            data->setServiceUUID(s->getServiceUuid());
+                                            data->setCharUUID(c->getCharacteristicUuid());
+                                            data->setDescUUID(d->getDescriptorUuid());
+                                            m_treeCtrl1->SetItemData(treedesc,data);
+                                        }
 
 
                                     }
@@ -372,9 +387,131 @@ void WinBleToolDialog::OnTreeItemRightClick( wxTreeEvent& event )
                 //特征项
                 m_treeCtrl1->SelectItem(Char->GetId());
                 m_treeCtrl1->Expand(Char->GetId());
+                {
+                    //弹出菜单
+                    wxMenu menu;
+                    if(Char->flag.read)
+                    {
+                        auto OnMenuReadChar=[=]( wxCommandEvent& event )
+                        {
+                            wxLogMessage(wxString(_T("正在读取设备..."))+Char->getInstanceId());
+                            try
+                            {
+                                BleDevice bleDevice = BleDevice(Char->getInstanceId());
+                                bleDevice.enumerateBleServices();
+                                for (unique_ptr<BleGattService> const& s : bleDevice.getBleGattServices())
+                                {
+                                    BTH_LE_UUID uuid1=s->getServiceUuid();
+                                    BTH_LE_UUID uuid2=Char->getServiceUUID();
+                                    if(memcmp(&uuid1,&uuid2,sizeof( BTH_LE_UUID))==0)
+                                    {
+                                        //已找到服务
+                                        {
+                                            wxString UUID;
+                                            if(s->getServiceUuid().IsShortUuid)
+                                            {
+                                                auto tohex=[](uint32_t num) -> std::string
+                                                {
+                                                    char buff[32]={0};
+                                                    sprintf(buff,"%x",num);
+                                                    return buff;
+                                                };
+                                                UUID=tohex(s->getServiceUuid().Value.ShortUuid);
+                                                std::string desc=GetBLEUuidDescByShortUuid(s->getServiceUuid().Value.ShortUuid);
+                                                if(!desc.empty())
+                                                {
+                                                    UUID+=std::string(" [")+desc+"] ";
+                                                }
+                                            }
+                                            else
+                                            {
+                                                UUID=Utility::guidToString(s->getServiceUuid().Value.LongUuid);
+                                            }
+                                            wxLogMessage(wxString(_T("\t已找到服务:"))+UUID);
+                                        }
 
+                                        s->enumerateBleCharacteristics();
+
+                                        for (unique_ptr<BleGattCharacteristic> const& c : s->getBleCharacteristics())
+                                        {
+                                            BTH_LE_UUID uuid3=c->getCharacteristicUuid();
+                                            BTH_LE_UUID uuid4=Char->getCharUUID();
+                                            if(memcmp(&uuid3,&uuid4,sizeof(BTH_LE_UUID))==0)
+                                            {
+                                                {
+                                                    wxString UUID;
+                                                    if(c->getCharacteristicUuid().IsShortUuid)
+                                                    {
+                                                        auto tohex=[](uint32_t num) -> std::string
+                                                        {
+                                                            char buff[32]={0};
+                                                            sprintf(buff,"%x",num);
+                                                            return buff;
+                                                        };
+                                                        UUID=tohex(c->getCharacteristicUuid().Value.ShortUuid);
+                                                        std::string desc=GetBLEUuidDescByShortUuid(c->getCharacteristicUuid().Value.ShortUuid);
+                                                        if(!desc.empty())
+                                                        {
+                                                            UUID+=std::string(" [")+desc+"] ";
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        UUID=Utility::guidToString(c->getCharacteristicUuid().Value.LongUuid);
+                                                    }
+                                                    wxLogMessage(wxString(_T("\t已找到特征:"))+UUID);
+                                                }
+
+                                                {
+                                                    //读取数据
+                                                    BleGattCharacteristicValue value=c->getValue();
+                                                    auto to_hex=[](const unsigned char *data,unsigned long len)->wxString
+                                                    {
+                                                        wxString ret;
+                                                        for(size_t i=0;i<len;i++)
+                                                        {
+                                                            char buff[10]={0};
+                                                            sprintf(buff,"%02X ",data[i]);
+                                                            ret+=buff;
+                                                        }
+                                                        return ret;
+                                                    };
+                                                    wxLogMessage(_T("读取数据（%lu字节）:\r\nASCII:\r\n%s\r\nHEX:\r\n%s"),value.getDataSize(),wxString::FromUTF8((const char *)value.getData()),to_hex(value.getData(),value.getDataSize()));
+                                                }
+                                                break;
+                                            }
+
+                                        }
+
+                                        break;
+                                    }
+                                }
+                                wxLogMessage(_T("读取数据已完成..."));
+                            }
+                            catch (BleException const &e)
+                            {
+                                wxLogError(e.what());
+                                wxLogError(_T("读取出错..."));
+                            }
+
+                        };
+                        wxMenuItem *item=menu.Append(1000,_T("读取"));
+                        menu.Bind(wxEVT_COMMAND_MENU_SELECTED,OnMenuReadChar);
+                    }
+                    PopupMenu(&menu);
+                }
+            }
+        }
+
+        {
+            BLEDescwxTreeItemData *Desc=dynamic_cast<BLEDescwxTreeItemData *>(data);
+            if(Desc!=NULL)
+            {
+                //描述符项
+                m_treeCtrl1->SelectItem(Desc->GetId());
             }
         }
 
     }
 }
+

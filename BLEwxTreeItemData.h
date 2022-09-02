@@ -67,6 +67,7 @@ protected:
     wstring _instanceId;
     BTH_LE_UUID service_uuid;
     BTH_LE_UUID char_uuid;
+
 public:
     BLECharwxTreeItemData()
     {
@@ -100,6 +101,66 @@ public:
     {
         char_uuid=uuid;
     }
+    typedef struct
+    {
+        bool notify;
+        bool read;
+        bool signedwrite;
+        bool write;
+        bool writewithoutresponse;
+    } flags;
+    flags flag;
 };
+
+class BLEDescwxTreeItemData:public wxTreeItemData
+{
+protected:
+    wstring _instanceId;
+    BTH_LE_UUID service_uuid;
+    BTH_LE_UUID char_uuid;
+    BTH_LE_UUID desc_uuid;
+public:
+    BLEDescwxTreeItemData()
+    {
+
+    }
+    virtual ~BLEDescwxTreeItemData()
+    {
+
+    }
+    wstring getInstanceId()
+    {
+        return _instanceId;
+    }
+    void setInstanceId(wstring id)
+    {
+        _instanceId=id;
+    }
+    BTH_LE_UUID getServiceUUID()
+    {
+        return service_uuid;
+    }
+    void setServiceUUID(BTH_LE_UUID uuid)
+    {
+        service_uuid=uuid;
+    }
+    BTH_LE_UUID getCharUUID()
+    {
+        return char_uuid;
+    }
+    void setCharUUID(BTH_LE_UUID uuid)
+    {
+        char_uuid=uuid;
+    }
+    BTH_LE_UUID getDescUUID()
+    {
+        return desc_uuid;
+    }
+    void setDescUUID(BTH_LE_UUID uuid)
+    {
+        desc_uuid=uuid;
+    }
+};
+
 
 #endif // BLEWXTREEITEMDATA_H
