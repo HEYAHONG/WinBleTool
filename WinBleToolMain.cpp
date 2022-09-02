@@ -392,7 +392,7 @@ void WinBleToolDialog::OnTreeItemRightClick( wxTreeEvent& event )
                     wxMenu menu;
                     if(Char->flag.read)
                     {
-                        auto OnMenuReadChar=[=]( wxCommandEvent& event )
+                        auto ReadChar=[=]( bool directRead)
                         {
                             wxLogMessage(wxString(_T("正在读取设备..."))+Char->getInstanceId());
                             try
@@ -464,7 +464,7 @@ void WinBleToolDialog::OnTreeItemRightClick( wxTreeEvent& event )
 
                                                 {
                                                     //读取数据
-                                                    BleGattCharacteristicValue value=c->getValue();
+                                                    BleGattCharacteristicValue value=c->getValue(directRead);
                                                     auto to_hex=[](const unsigned char *data,unsigned long len)->wxString
                                                     {
                                                         wxString ret;
@@ -495,8 +495,27 @@ void WinBleToolDialog::OnTreeItemRightClick( wxTreeEvent& event )
                             }
 
                         };
-                        wxMenuItem *item=menu.Append(1000,_T("读取"));
-                        menu.Bind(wxEVT_COMMAND_MENU_SELECTED,OnMenuReadChar);
+
+
+                        {
+                            auto OnMenuReadChar=[=]( wxCommandEvent& event )
+                            {
+                                ReadChar(false);
+                            };
+                            wxMenuItem *item=menu.Append(1000,_T("读取"));
+                            menu.Bind(wxEVT_COMMAND_MENU_SELECTED,OnMenuReadChar,item->GetId(),item->GetId());
+                        }
+
+
+                        {
+                            auto OnMenuDirectReadChar=[=]( wxCommandEvent& event )
+                            {
+                                ReadChar(true);
+                            };
+                            wxMenuItem *item=menu.Append(1001,_T("读取(从设备中读取)"));
+                            menu.Bind(wxEVT_COMMAND_MENU_SELECTED,OnMenuDirectReadChar,item->GetId(),item->GetId());
+                        }
+
                     }
                     PopupMenu(&menu);
                 }
