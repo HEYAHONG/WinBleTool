@@ -23,7 +23,7 @@ if(STATIC_BUILD)
 endif()
 
 
-file(GLOB MAIN_CXX_C_FILES *.cpp *.hpp *.c *.hpp )
+file(GLOB MAIN_CXX_C_FILES *.cpp *.hpp *.c *.h bluetooth/*.c bluetooth/*.cpp bluetooth/*.h )
 list(APPEND  MAIN_SRCS ${MAIN_CXX_C_FILES})
 
 if(WIN32)
@@ -34,6 +34,7 @@ endif()
 
 add_executable(${PROJECT_NAME} ${MAIN_SRCS})
 target_link_libraries(${PROJECT_NAME} ${MAIN_LIBS})
+target_include_directories(${PROJECT_NAME} PUBLIC bluetooth )
 
 #添加线程库
 FIND_PACKAGE(Threads REQUIRED)

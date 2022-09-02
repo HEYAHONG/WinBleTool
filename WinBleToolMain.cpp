@@ -27,6 +27,7 @@
 #include "wx/textdlg.h"
 #include "wx/log.h"
 #include <sstream>
+#include "misc.h"
 
 extern const char * bluetooth_ico_xpm[];
 
@@ -119,6 +120,11 @@ void WinBleToolDialog::RefreshBLEDeviceList()
                             if(s->getServiceUuid().IsShortUuid)
                             {
                                 UUID=tohex(s->getServiceUuid().Value.ShortUuid);
+                                std::string desc=GetBLEUuidDescByShortUuid(s->getServiceUuid().Value.ShortUuid);
+                                if(!desc.empty())
+                                {
+                                    UUID+=std::string(" [")+desc+"] ";
+                                }
                             }
                             else
                             {
@@ -186,6 +192,11 @@ void WinBleToolDialog::RefreshBLEDeviceList()
                                 if(c->getCharacteristicUuid().IsShortUuid)
                                 {
                                     UUID=tohex(c->getCharacteristicUuid().Value.ShortUuid);
+                                    std::string desc=GetBLEUuidDescByShortUuid(c->getCharacteristicUuid().Value.ShortUuid);
+                                    if(!desc.empty())
+                                    {
+                                        UUID+=std::string(" [")+desc+"] ";
+                                    }
                                 }
                                 else
                                 {
@@ -213,6 +224,11 @@ void WinBleToolDialog::RefreshBLEDeviceList()
                                         if(d->getDescriptorUuid().IsShortUuid)
                                         {
                                             UUID=tohex(d->getDescriptorUuid().Value.ShortUuid);
+                                            std::string desc=GetBLEUuidDescByShortUuid(d->getDescriptorUuid().Value.ShortUuid);
+                                            if(!desc.empty())
+                                            {
+                                                UUID+=std::string(" [")+desc+"] ";
+                                            }
                                         }
                                         else
                                         {
