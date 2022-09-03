@@ -21,6 +21,9 @@
 #include "mutex"
 #include "functional"
 #include "queue"
+#include <memory>
+#include <map>
+#include <BleDevice.h>
 
 class WinBleToolDialog: public GUIDialog
 {
@@ -74,6 +77,11 @@ private:
         刷新设备列表
     */
     void RefreshBLEDeviceList();
+
+    /*
+        设备列表(只在主线程及定时器内访问)
+    */
+    std::map<std::wstring,std::shared_ptr<BleDevice>> BLEDeviceList;
 
 };
 #endif // WINBLETOOLMAIN_H
