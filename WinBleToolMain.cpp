@@ -478,7 +478,7 @@ void WinBleToolDialog::OnTreeItemRightClick( wxTreeEvent& event )
                                                         }
                                                         return ret;
                                                     };
-                                                    wxLogMessage(_T("读取数据（%lu字节）:\r\nASCII:\r\n%s\r\nHEX:\r\n%s"),value.getDataSize(),wxString::FromUTF8((const char *)value.getData()),to_hex(value.getData(),value.getDataSize()));
+                                                    wxLogMessage(_T("读取数据（%lu字节）:\r\nASCII:\r\n%s\r\nHEX:\r\n%s"),value.getDataSize(),wxString::FromUTF8((const char *)value.getData(),value.getDataSize()),to_hex(value.getData(),value.getDataSize()));
                                                 }
                                                 break;
                                             }
