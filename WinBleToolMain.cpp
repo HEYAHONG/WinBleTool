@@ -23,6 +23,7 @@
 
 #include "WinBleToolMain.h"
 #include "BLEwxTreeItemData.h"
+#include "InputDialog.h"
 #include "wx/msgdlg.h"
 #include "wx/textdlg.h"
 #include "wx/log.h"
@@ -45,6 +46,7 @@ WinBleToolDialog::WinBleToolDialog(wxWindow * dlg)
 
     //刷新设备列表
     RefreshBLEDeviceList();
+
 }
 
 WinBleToolDialog::~WinBleToolDialog()
@@ -516,7 +518,185 @@ void WinBleToolDialog::OnTreeItemRightClick( wxTreeEvent& event )
                             menu.Bind(wxEVT_COMMAND_MENU_SELECTED,OnMenuDirectReadChar,item->GetId(),item->GetId());
                         }
 
+                        menu.AppendSeparator();
+
                     }
+
+                    if(Char->flag.write || Char->flag.writewithoutresponse)
+                    {
+                        //写入
+
+                        auto WriteChar=[=](std::string data,bool writewithoutresponse)
+                        {
+                            wxLogMessage(wxString(_T("正在写入设备..."))+Char->getInstanceId());
+                            try
+                            {
+                                BleDevice bleDevice = BleDevice(Char->getInstanceId());
+                                bleDevice.enumerateBleServices();
+                                for (unique_ptr<BleGattService> const& s : bleDevice.getBleGattServices())
+                                {
+                                    BTH_LE_UUID uuid1=s->getServiceUuid();
+                                    BTH_LE_UUID uuid2=Char->getServiceUUID();
+                                    if(memcmp(&uuid1,&uuid2,sizeof( BTH_LE_UUID))==0)
+                                    {
+                                        //已找到服务
+                                        {
+                                            wxString UUID;
+                                            if(s->getServiceUuid().IsShortUuid)
+                                            {
+                                                auto tohex=[](uint32_t num) -> std::string
+                                                {
+                                                    char buff[32]={0};
+                                                    sprintf(buff,"%x",num);
+                                                    return buff;
+                                                };
+                                                UUID=tohex(s->getServiceUuid().Value.ShortUuid);
+                                                std::string desc=GetBLEUuidDescByShortUuid(s->getServiceUuid().Value.ShortUuid);
+                                                if(!desc.empty())
+                                                {
+                                                    UUID+=std::string(" [")+desc+"] ";
+                                                }
+                                            }
+                                            else
+                                            {
+                                                UUID=Utility::guidToString(s->getServiceUuid().Value.LongUuid);
+                                            }
+                                            wxLogMessage(wxString(_T("\t已找到服务:"))+UUID);
+                                        }
+
+                                        s->enumerateBleCharacteristics();
+
+                                        for (unique_ptr<BleGattCharacteristic> const& c : s->getBleCharacteristics())
+                                        {
+                                            BTH_LE_UUID uuid3=c->getCharacteristicUuid();
+                                            BTH_LE_UUID uuid4=Char->getCharUUID();
+                                            if(memcmp(&uuid3,&uuid4,sizeof(BTH_LE_UUID))==0)
+                                            {
+                                                {
+                                                    wxString UUID;
+                                                    if(c->getCharacteristicUuid().IsShortUuid)
+                                                    {
+                                                        auto tohex=[](uint32_t num) -> std::string
+                                                        {
+                                                            char buff[32]={0};
+                                                            sprintf(buff,"%x",num);
+                                                            return buff;
+                                                        };
+                                                        UUID=tohex(c->getCharacteristicUuid().Value.ShortUuid);
+                                                        std::string desc=GetBLEUuidDescByShortUuid(c->getCharacteristicUuid().Value.ShortUuid);
+                                                        if(!desc.empty())
+                                                        {
+                                                            UUID+=std::string(" [")+desc+"] ";
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        UUID=Utility::guidToString(c->getCharacteristicUuid().Value.LongUuid);
+                                                    }
+                                                    wxLogMessage(wxString(_T("\t已找到特征:"))+UUID);
+                                                }
+
+                                                {
+                                                    //写入数据
+                                                    c->setValue((uint8_t *)data.c_str(),data.length(),writewithoutresponse);
+                                                }
+                                                break;
+                                            }
+
+                                        }
+
+                                        break;
+                                    }
+                                }
+                                wxLogMessage(_T("写入数据已完成..."));
+                            }
+                            catch (BleException const &e)
+                            {
+                                wxLogError(e.what());
+                                wxLogError(_T("写入出错..."));
+                            }
+
+                        };
+
+
+                        if(Char->flag.write)
+                        {
+                            auto OnMenuWriteChar=[=]( wxCommandEvent& event )
+                            {
+                                InputDialog dlg(this);
+                                if(dlg.ShowModal()==wxID_OK)
+                                {
+                                    {
+                                        wxString data;
+                                        if(dlg.IsHEX())
+                                        {
+                                            std::string hexdata=dlg.GetData();
+                                            for(size_t i=0; i<hexdata.length(); i++)
+                                            {
+                                                char buff[10]= {0};
+                                                sprintf(buff,"%02X ",hexdata.c_str()[i]);
+                                                data+=buff;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            data=dlg.GetData();
+                                        }
+
+                                        wxLogMessage(_T("待写入数据:\r\n%s"),data);
+                                    }
+
+                                    WriteChar(dlg.GetData(),false);
+                                }
+                                else
+                                {
+                                    wxLogMessage(_T("取消写入"));
+                                }
+                            };
+                            wxMenuItem *item=menu.Append(1002,_T("写入"));
+                            menu.Bind(wxEVT_COMMAND_MENU_SELECTED,OnMenuWriteChar,item->GetId(),item->GetId());
+                        }
+
+                        if(Char->flag.writewithoutresponse)
+                        {
+                            auto OnMenuWriteWithoutResponseChar=[=]( wxCommandEvent& event )
+                            {
+                                InputDialog dlg(this);
+                                if(dlg.ShowModal()==wxID_OK)
+                                {
+                                    {
+                                        wxString data;
+                                        if(dlg.IsHEX())
+                                        {
+                                            std::string hexdata=dlg.GetData();
+                                            for(size_t i=0; i<hexdata.length(); i++)
+                                            {
+                                                char buff[10]= {0};
+                                                sprintf(buff,"%02X ",hexdata.c_str()[i]);
+                                                data+=buff;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            data=dlg.GetData();
+                                        }
+
+                                        wxLogMessage(_T("待快速写入数据:\r\n%s"),data);
+                                    }
+
+                                    WriteChar(dlg.GetData(),true);
+                                }
+                                else
+                                {
+                                    wxLogMessage(_T("取消快速写入"));
+                                }
+                            };
+                            wxMenuItem *item=menu.Append(1003,_T("快速写入(不等待响应)"));
+                            menu.Bind(wxEVT_COMMAND_MENU_SELECTED,OnMenuWriteWithoutResponseChar,item->GetId(),item->GetId());
+                        }
+
+                    }
+
                     PopupMenu(&menu);
                 }
             }
