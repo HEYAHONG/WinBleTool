@@ -9,7 +9,7 @@
 
 #ifndef WINBLETOOLAPP_H
 #define WINBLETOOLAPP_H
-
+#include <winsock2.h>
 #include <wx/app.h>
 
 class WinBleToolApp : public wxApp
