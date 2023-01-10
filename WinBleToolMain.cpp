@@ -7,6 +7,7 @@
  * License:
  **************************************************************/
 
+#include "winsock2.h"
 #include <Utility.h>
 #include <BleDevice.h>
 #include <BleException.h>
