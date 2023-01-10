@@ -67,6 +67,7 @@ void WinBleToolDialog::OnQuit(wxCommandEvent &event)
 void WinBleToolDialog::OnAbout(wxCommandEvent &event)
 {
     GuiDialogAbout dlg(this);
+    dlg.m_versionstr->SetLabel(_T(PROJECT_VERSION_STR));
     dlg.ShowModal();
 }
 

@@ -13,7 +13,7 @@
 
 
 #include "WinBleToolApp.h"
-
+#include "Version.h"
 
 
 #include "GUIDialog.h"

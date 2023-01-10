@@ -85,7 +85,11 @@ GuiDialogAbout::GuiDialogAbout( wxWindow* parent, wxWindowID id, const wxString&
 
 	m_staticText2 = new wxStaticText( this, wxID_ANY, wxT("WinBleTool BY 何亚红"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText2->Wrap( -1 );
-	bSizer6->Add( m_staticText2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+	bSizer6->Add( m_staticText2, 0, wxALL|wxALIGN_CENTER_HORIZONTAL, 5 );
+
+	m_versionstr = new wxStaticText( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_versionstr->Wrap( -1 );
+	bSizer6->Add( m_versionstr, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxEXPAND, 5 );
 
 	wxBoxSizer* bSizer4;
 	bSizer4 = new wxBoxSizer( wxHORIZONTAL );
