@@ -80,7 +80,7 @@ target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES})
 
 
 #添加WinBle库
-add_subdirectory(WinBle/src)
+add_subdirectory(WinBle/src  EXCLUDE_FROM_ALL SYSTEM)
 Set(PROJECT_NAME WinBleTool)
 target_link_libraries(${PROJECT_NAME} WinBle)
 
