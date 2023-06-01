@@ -1,4 +1,4 @@
-#include "misc.h"
+Ôªø#include "misc.h"
 #include "gatt_profile_uuid.h"
 
 typedef struct
@@ -11,7 +11,7 @@ typedef struct
 
 static const BLEUuidDesc_t desc_array[]=
 {
-//Gatt∑˛ŒÒ
+//GattÊúçÂä°
     MicroToBLEUuidDesc(GAP_SERVICE_UUID),//                           0x1800 // Generic Access Profile
     MicroToBLEUuidDesc(GATT_SERVICE_UUID),//                          0x1801 // Generic Attribute Profile
     MicroToBLEUuidDesc(IMMEDIATE_ALERT_SERV_UUID),//       0x1802  // Immediate Alert
@@ -42,7 +42,7 @@ static const BLEUuidDesc_t desc_array[]=
     MicroToBLEUuidDesc(GATT_INCLUDE_UUID),//                          0x2802 // Include
     MicroToBLEUuidDesc(GATT_CHARACTER_UUID),//                        0x2803 // Characteristic
 
-//GattÃÿ’˜
+//GattÁâπÂæÅ
     MicroToBLEUuidDesc(DEVICE_NAME_UUID),//                           0x2A00 // Device Name
     MicroToBLEUuidDesc(APPEARANCE_UUID),//                            0x2A01 // Appearance
     MicroToBLEUuidDesc(PERI_PRIVACY_FLAG_UUID),//                     0x2A02 // Peripheral Privacy Flag

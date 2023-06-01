@@ -3,6 +3,7 @@
 
 #include "GUIDialog.h"
 #include <string>
+#include <stdint.h>
 
 class InputDialog: public GuiDialogInputData
 {
